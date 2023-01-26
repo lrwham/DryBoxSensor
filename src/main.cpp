@@ -42,7 +42,7 @@ void handleMessage(AdafruitIO_Data *data) {
 }
 
 
-uint16_t battery_level() {
+int battery_level() {
 
   // read the battery level from the ESP8266 analog in pin.
   // analog read level is 10 bit 0-1023 (0V-1V).
@@ -54,7 +54,7 @@ uint16_t battery_level() {
   int level = 0;
 
   for(int i = 0; i < BATTERY_ADC_SAMPLES + 1; i++){
-    uint16_t temp = analogRead(BATTERY_ADC_PIN);
+    int temp = analogRead(BATTERY_ADC_PIN);
 
     level = ((level * i) + temp) / (i + 1);
 
@@ -102,6 +102,10 @@ void setup() {
   digital->get();
 
   sensor.begin();
+
+  // 9.18ma typical current draw
+  // safe for digital pin
+  sensor.setHeatLevel(SI_HEATLEVEL_LOW);
 }
 
 void loop() {
@@ -111,9 +115,22 @@ void loop() {
   // function. it keeps the client connected to
   // io.adafruit.com, and processes any incoming data.
   io.run();
-
   float celsius = sensor.readTemperature();
+  Serial.println(temperature->save(celsius));
+
+  io.run();
   float sensorHumidity = sensor.readHumidity();
+  Serial.println(humidity->save(sensorHumidity));
+
+  io.run();
+  int level = battery_level();
+  Serial.println(battery->save(level));
+
+  io.run();
+  digitalWrite(GPIO_POWER_SI7021, LOW);
+  digital->save(0);
+  
+  io.run();
 
   // serial console 
   Serial.print("celsius: ");
@@ -122,17 +139,8 @@ void loop() {
   Serial.print("humidity: ");
   Serial.print(sensorHumidity);
   Serial.println("%");
+  
 
-  // update Adafruit IO
-  humidity->save(sensorHumidity);
-  temperature->save(celsius);
-
-    // send battery level to AIO
-  battery->save(battery_level());
-
-  // turn OFF the sensor
-  digitalWrite(GPIO_POWER_SI7021, LOW);
-  digital->save(0);
 
   // Deepsleep to save battery life
   Serial.println("zzzz");

@@ -24,21 +24,17 @@ Adafruit_Si7021 sensor = Adafruit_Si7021();
 
 void handleMessage(AdafruitIO_Data *data) {
 
-  Serial.println("received <- ");
-  Serial.println(data->toPinLevel());
-
   if (data->toPinLevel() == HIGH) {
-    Serial.println("Heater ON");
-    sensor.heater(1);
+    sensor.heater(true);
+    Serial.println(sensor.isHeaterEnabled() == true  ? "Heater is on." : "Heater is off.");
     delay(HEATER_ON_TIME);
-  } else {
-  }
+    sensor.heater(false);
+    digital->save(false);
 
-  sensor.heater(0);
-  Serial.println("Heater OFF");
-
-
-  Serial.print(sensor.isHeaterEnabled());
+  } 
+  
+  Serial.println(sensor.isHeaterEnabled()  ? "Heater is on." : "Heater is off.");
+  
 }
 
 
@@ -56,6 +52,7 @@ int battery_level() {
   for(int i = 0; i < BATTERY_ADC_SAMPLES + 1; i++){
     int temp = analogRead(BATTERY_ADC_PIN);
 
+    // weight and average
     level = ((level * i) + temp) / (i + 1);
 
     delay(BATTERY_ADC_SAMPLE_DELAY);
@@ -102,6 +99,7 @@ void setup() {
   digital->get();
 
   sensor.begin();
+  sensor.heater(false);
 
   // 9.18ma typical current draw
   // safe for digital pin
@@ -115,20 +113,19 @@ void loop() {
   // function. it keeps the client connected to
   // io.adafruit.com, and processes any incoming data.
   io.run();
-  float celsius = sensor.readTemperature();
-  Serial.println(temperature->save(celsius));
-
-  io.run();
-  float sensorHumidity = sensor.readHumidity();
-  Serial.println(humidity->save(sensorHumidity));
-
-  io.run();
   int level = battery_level();
-  Serial.println(battery->save(level));
+  Serial.println(battery->save(level) ? "Success! Battery feed updated." : "Failed to update Battery Feed");
 
-  io.run();
+  //io.run();
+  float celsius = sensor.readTemperature();
+  Serial.println(temperature->save(celsius) ? "Success! Temperature feed updated." : "Failed to update Temperature Feed");
+ 
+  //io.run();
+  float sensorHumidity = sensor.readHumidity();
+  Serial.println(humidity->save(sensorHumidity) ? "Success! Humidity feed updated." : "Failed to update Humidity Feed");
+
+  //io.run();
   digitalWrite(GPIO_POWER_SI7021, LOW);
-  digital->save(0);
   
   io.run();
 

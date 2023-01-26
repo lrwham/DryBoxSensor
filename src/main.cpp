@@ -31,7 +31,6 @@ void handleMessage(AdafruitIO_Data *data) {
     sensor.heater(false);
     digital->save(false);
 
-
   } 
   
   Serial.println(sensor.isHeaterEnabled()  ? "Heater is on." : "Heater is off.");
@@ -53,6 +52,7 @@ int battery_level() {
   for(int i = 0; i < BATTERY_ADC_SAMPLES + 1; i++){
     int temp = analogRead(BATTERY_ADC_PIN);
 
+    // weight and average
     level = ((level * i) + temp) / (i + 1);
 
     delay(BATTERY_ADC_SAMPLE_DELAY);
@@ -116,15 +116,15 @@ void loop() {
   int level = battery_level();
   Serial.println(battery->save(level) ? "Success! Battery feed updated." : "Failed to update Battery Feed");
 
-  io.run();
+  //io.run();
   float celsius = sensor.readTemperature();
   Serial.println(temperature->save(celsius) ? "Success! Temperature feed updated." : "Failed to update Temperature Feed");
  
-  io.run();
+  //io.run();
   float sensorHumidity = sensor.readHumidity();
   Serial.println(humidity->save(sensorHumidity) ? "Success! Humidity feed updated." : "Failed to update Humidity Feed");
 
-  io.run();
+  //io.run();
   digitalWrite(GPIO_POWER_SI7021, LOW);
   
   io.run();

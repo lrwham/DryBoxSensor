@@ -7,6 +7,7 @@ All of the code here is based off their example sketch for temperature and humid
 * added deep sleep for increased battery life
 * used a digital pin to power the temperature sensor ON for readings and OFF to save power.
     * the sensor lists 150 μA active current
+    * [Datasheet](https://cdn-learn.adafruit.com/assets/assets/000/035/931/original/Support_Documents_TechnicalDocs_Si7021-A20.pdf)
 # Gotchas
 Run ```io.run()``` **often**. You won't get an error message if a feed fails to update with ```feed->save()```
 

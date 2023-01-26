@@ -1,3 +1,7 @@
+# Dry Box Sensor
+I'm curious how effective the silica dessicant packs are in combination with a few different types of plastic boxes. I intend to setup a few of these sensors in a few combinations of boxes to see the results.
+
+I have some typical boxes with snap on lids as well as a few boxes with gaskets that claim to be waterproof (not airtight).
 # Thanks to Adafruit
 All of this is fantastically easy thanks to the hard work of the community and the people at Adafruit!
 All of the code here is based off their example sketch for temperature and humidity data logging with Adafruit IO.

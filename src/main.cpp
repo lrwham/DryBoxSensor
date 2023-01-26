@@ -1,34 +1,24 @@
+// For measuring temperature and humidity in a dry box.
+// Gently tweaked by Lawton Willingham
+//
+// Based on
 // Adafruit IO Temperature & Humidity Example
 // Tutorial Link: https://learn.adafruit.com/adafruit-io-basics-temperature-and-humidity
-//
-// Adafruit invests time and resources providing this open source code.
-// Please support Adafruit and open source hardware by purchasing
-// products from Adafruit!
-//
-// Written by Todd Treece for Adafruit Industries
-// Copyright (c) 2016-2017 Adafruit Industries
-// Licensed under the MIT license.
-//
-// All text above must be included in any redistribution.
+// Adafruit Copyright INFO at BOTTOM
 
 /************************** Configuration ***********************************/
 
-// edit the config.h tab and enter your Adafruit IO credentials
-// and any additional configuration needed for WiFi, cellular,
-// or ethernet clients.
+
 #include "config.h"
 #include "Adafruit_Si7021.h"
-
-
-/************************ Example Starts Here *******************************/
 #include <Adafruit_Sensor.h>
 #include "Adafruit_SPIDevice.h"
 
-
 // set up the 'temperature' and 'humidity' feeds
-AdafruitIO_Feed *temperature = io.feed("dryboxThingPlus.temperature");
-AdafruitIO_Feed *humidity = io.feed("dryboxThingPlus.humidity");
-AdafruitIO_Feed *digital = io.feed("dryboxThingPlus.heater-toggle");
+AdafruitIO_Feed *temperature = io.feed("drybox.temperature");
+AdafruitIO_Feed *humidity = io.feed("drybox.humidity");
+AdafruitIO_Feed *digital = io.feed("drybox.heater-toggle");
+AdafruitIO_Feed *battery = io.feed("drybox.battery");
 
 Adafruit_Si7021 sensor = Adafruit_Si7021();
 
@@ -52,7 +42,7 @@ void handleMessage(AdafruitIO_Data *data) {
 }
 
 
-void battery_level() {
+uint16_t battery_level() {
 
   // read the battery level from the ESP8266 analog in pin.
   // analog read level is 10 bit 0-1023 (0V-1V).
@@ -60,31 +50,30 @@ void battery_level() {
   // lipo value of 4.2V and drops it to 0.758V max.
   // this means our min analog read value should be 580 (3.14V)
   // and the max analog read value should be 774 (4.2V).
-  int accumulator = 0;
 
-  for(int i = 0; i < BATTERY_ADC_SAMPLES; i++){
-    accumulator += analogRead(A0);
+  int level = 0;
+
+  for(int i = 0; i < BATTERY_ADC_SAMPLES + 1; i++){
+    uint16_t temp = analogRead(BATTERY_ADC_PIN);
+
+    level = ((level * i) + temp) / (i + 1);
+
     delay(BATTERY_ADC_SAMPLE_DELAY);
   }
 
-  int level = accumulator / BATTERY_ADC_SAMPLES;
-
   // convert battery level to percent
-  level = map(level, 580, 774, 0, 100);
+  level = map(level, MIN_ANALOG_READING, MAX_ANALOG_READING, MIN_BATTERY_CAPACITY, MAX_BATTERY_CAPACITY);
+
   Serial.print("Battery level: ");
   Serial.print(level);
   Serial.println("%");
 
-  // grab the battery feed
-  AdafruitIO_Feed *battery = io.feed("dryboxThingPlus.battery");
-
-  // send battery level to AIO
-  battery->save(level);
-  io.run();
+  return level;
 }
 
 
 void setup() {
+
   pinMode(GPIO_POWER_SI7021, OUTPUT);
   digitalWrite(GPIO_POWER_SI7021, HIGH);
 
@@ -124,32 +113,40 @@ void loop() {
   io.run();
 
   float celsius = sensor.readTemperature();
-  float fahrenheit = (celsius * 1.8) + 32;
-  float readhumidity = sensor.readHumidity();
+  float sensorHumidity = sensor.readHumidity();
 
+  // serial console 
   Serial.print("celsius: ");
   Serial.print(celsius);
   Serial.println("C");
-
-  Serial.print("fahrenheit: ");
-  Serial.print(fahrenheit);
-  Serial.println("F");
-
-  // save fahrenheit (or celsius) to Adafruit IO
-  temperature->save(fahrenheit);
-
   Serial.print("humidity: ");
-  Serial.print(readhumidity);
+  Serial.print(sensorHumidity);
   Serial.println("%");
 
-  // save humidity to Adafruit IO
-  humidity->save(readhumidity);
+  // update Adafruit IO
+  humidity->save(sensorHumidity);
+  temperature->save(celsius);
 
-  battery_level();
+    // send battery level to AIO
+  battery->save(battery_level());
+
+  // turn OFF the sensor
   digitalWrite(GPIO_POWER_SI7021, LOW);
   digital->save(0);
 
-  // wait 5 seconds (5000 milliseconds == 5 seconds)
+  // Deepsleep to save battery life
   Serial.println("zzzz");
   ESP.deepSleep(DEEPSLEEP_INTERVAL);
 }
+
+// Based on
+// Adafruit IO Temperature & Humidity Example
+// Tutorial Link: https://learn.adafruit.com/adafruit-io-basics-temperature-and-humidity
+//
+// Adafruit invests time and resources providing this open source code.
+// Please support Adafruit and open source hardware by purchasing
+// products from Adafruit!
+//
+// Written by Todd Treece for Adafruit Industries
+// Copyright (c) 2016-2017 Adafruit Industries
+// Licensed under the MIT license.

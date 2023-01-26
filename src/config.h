@@ -3,14 +3,25 @@
 
 #include "secretConfig.h"
 
+/************************   Pins    *****************************************/
+#define BATTERY_ADC_PIN A0
+#define GPIO_POWER_SI7021 12
+
 /************************ Constants *****************************************/
 #define BATTERY_ADC_SAMPLES 20
 #define BATTERY_ADC_SAMPLE_DELAY 5
-#define GPIO_POWER_SI7021 12
+
 #define DEEPSLEEP_SECONDS 60
 #define DEEPSLEEP_INTERVAL 1000000 * DEEPSLEEP_SECONDS
+
 #define SERIAL_RATE 115200
+
 #define HEATER_ON_TIME 1000
+
+#define MIN_ANALOG_READING 580 // 3.14V
+#define MAX_ANALOG_READING 774 // 4.2V
+#define MIN_BATTERY_CAPACITY 0 // 0%
+#define MAX_BATTERY_CAPACITY 100 // 100%
 
 // comment out the following lines if you are using fona or ethernet
 #ifndef IO_VAR_CREATED

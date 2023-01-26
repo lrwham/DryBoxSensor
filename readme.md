@@ -5,8 +5,12 @@ All of the code here is based off their example sketch for temperature and humid
 * added battery level reporting to a feed
 * added a feed for remote toggling the heater
 * added deep sleep for increased battery life
+* used a digital pin to power the temperature sensor ON for readings and OFF to save power.
+    * the sensor lists 150 μA active current
 # Gotchas
-Run ```io.run()``` **often**
+Run ```io.run()``` **often**. You won't get an error message if a feed fails to update with ```feed->save()```
+
+```io.run()``` seems to keep things alive so the feed is **more likely** to update.
 ## secretConfig.h
 You must create a secretConfig.h file.
 

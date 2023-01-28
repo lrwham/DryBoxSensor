@@ -8,7 +8,6 @@
 
 /************************** Configuration ***********************************/
 
-
 #include "config.h"
 #include "Adafruit_Si7021.h"
 #include <Adafruit_Sensor.h>
@@ -22,23 +21,23 @@ AdafruitIO_Feed *battery = io.feed("drybox.battery");
 
 Adafruit_Si7021 sensor = Adafruit_Si7021();
 
-void handleMessage(AdafruitIO_Data *data) {
+void handleMessage(AdafruitIO_Data *data)
+{
 
-  if (data->toPinLevel() == HIGH) {
+  if (data->toPinLevel() == HIGH)
+  {
     sensor.heater(true);
-    Serial.println(sensor.isHeaterEnabled() == true  ? "Heater is on." : "Heater is off.");
+    Serial.println(sensor.isHeaterEnabled() == true ? "Heater is on." : "Heater is off.");
     delay(HEATER_ON_TIME);
     sensor.heater(false);
     digital->save(false);
+  }
 
-  } 
-  
-  Serial.println(sensor.isHeaterEnabled()  ? "Heater is on." : "Heater is off.");
-  
+  Serial.println(sensor.isHeaterEnabled() ? "Heater is on." : "Heater is off.");
 }
 
-
-int battery_level() {
+int battery_level()
+{
 
   // read the battery level from the ESP8266 analog in pin.
   // analog read level is 10 bit 0-1023 (0V-1V).
@@ -49,7 +48,8 @@ int battery_level() {
 
   int level = 0;
 
-  for(int i = 0; i < BATTERY_ADC_SAMPLES + 1; i++){
+  for (int i = 0; i < BATTERY_ADC_SAMPLES + 1; i++)
+  {
     int temp = analogRead(BATTERY_ADC_PIN);
 
     // weight and average
@@ -68,8 +68,8 @@ int battery_level() {
   return level;
 }
 
-
-void setup() {
+void setup()
+{
 
   pinMode(GPIO_POWER_SI7021, OUTPUT);
   digitalWrite(GPIO_POWER_SI7021, HIGH);
@@ -86,7 +86,8 @@ void setup() {
   io.connect();
 
   // wait for a connection
-  while (io.status() < AIO_CONNECTED) {
+  while (io.status() < AIO_CONNECTED)
+  {
     Serial.print(".");
     delay(500);
   }
@@ -106,7 +107,8 @@ void setup() {
   sensor.setHeatLevel(SI_HEATLEVEL_LOW);
 }
 
-void loop() {
+void loop()
+{
 
   // io.run(); is required for all sketches.
   // it should always be present at the top of your loop
@@ -116,28 +118,26 @@ void loop() {
   int level = battery_level();
   Serial.println(battery->save(level) ? "Success! Battery feed updated." : "Failed to update Battery Feed");
 
-  //io.run();
+  // io.run();
   float celsius = sensor.readTemperature();
   Serial.println(temperature->save(celsius) ? "Success! Temperature feed updated." : "Failed to update Temperature Feed");
- 
-  //io.run();
+
+  // io.run();
   float sensorHumidity = sensor.readHumidity();
   Serial.println(humidity->save(sensorHumidity) ? "Success! Humidity feed updated." : "Failed to update Humidity Feed");
 
-  //io.run();
+  // io.run();
   digitalWrite(GPIO_POWER_SI7021, LOW);
-  
+
   io.run();
 
-  // serial console 
+  // serial console
   Serial.print("celsius: ");
   Serial.print(celsius);
   Serial.println("C");
   Serial.print("humidity: ");
   Serial.print(sensorHumidity);
   Serial.println("%");
-  
-
 
   // Deepsleep to save battery life
   Serial.println("zzzz");

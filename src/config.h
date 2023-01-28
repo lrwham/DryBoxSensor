@@ -20,9 +20,9 @@
 
 #define HEATER_ON_TIME 1000
 
-#define MIN_ANALOG_READING 580 // 3.14V
-#define MAX_ANALOG_READING 774 // 4.2V
-#define MIN_BATTERY_CAPACITY 0 // 0%
+#define MIN_ANALOG_READING 580   // 3.14V
+#define MAX_ANALOG_READING 774   // 4.2V
+#define MIN_BATTERY_CAPACITY 0   // 0%
 #define MAX_BATTERY_CAPACITY 100 // 100%
 
 // comment out the following lines if you are using fona or ethernet
@@ -30,7 +30,7 @@
 #define IO_VAR_CREATED
 #include "AdafruitIO_WiFi.h"
 
-#if defined(USE_AIRLIFT) || defined(ADAFRUIT_METRO_M4_AIRLIFT_LITE) ||         \
+#if defined(USE_AIRLIFT) || defined(ADAFRUIT_METRO_M4_AIRLIFT_LITE) || \
     defined(ADAFRUIT_PYPORTAL)
 // Configure the pins used for the ESP32 connection
 #if !defined(SPIWIFI_SS) // if the wifi definition isnt in the board variant
